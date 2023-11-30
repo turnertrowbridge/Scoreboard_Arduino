@@ -13,12 +13,12 @@
  and shows the time.
 
   The circuit:
- * LCD RS pin to digital pin 7
- * LCD Enable pin to digital pin 8
- * LCD D4 pin to digital pin 9
- * LCD D5 pin to digital pin 10
- * LCD D6 pin to digital pin 11
- * LCD D7 pin to digital pin 12
+ * LCD RS pin to digital pin 8
+ * LCD Enable pin to digital pin 9
+ * LCD D4 pin to digital pin 10
+ * LCD D5 pin to digital pin 11
+ * LCD D6 pin to digital pin 12
+ * LCD D7 pin to digital pin 13
  * LCD R/W pin to ground
  * LCD VSS pin to ground
  * LCD VCC pin to 5V
@@ -44,16 +44,69 @@
 #include <LiquidCrystal.h>
 #include <Arduino_JSON.h>
 
+#define RED1 7
+#define RED2 6
+#define RED3 5
+const int redPins[] = {7, 6, 5};
+
+#define RGB_BLUE 4
+#define RGB_GREEN 3
+#define RGB_RED 2
+
+const int rgbPins[] = {4, 3, 2};
+
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
 String currentText[2]; // Array to store text for each row
 String savedLastPlay = "";
+int savedOuts = 0;
+
+// rgb values
+int redValue;
+int greenValue;
+int blueValue;
 
 
 void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   Serial.begin(9600);
+
+  // red lights
+  pinMode(RED1, OUTPUT);
+  pinMode(RED2, OUTPUT);
+  pinMode(RED3, OUTPUT);
+
+  // rgb pins
+  pinMode(RGB_RED, OUTPUT);
+  pinMode(RGB_GREEN, OUTPUT);
+  pinMode(RGB_BLUE, OUTPUT);
+  
+  redValue = 64;
+  greenValue = 224;
+  blueValue = 208;
+
+  digitalWrite(RGB_RED, HIGH);
+  digitalWrite(RGB_GREEN, HIGH);
+  digitalWrite(RGB_BLUE, HIGH);
+
+
+  // HIGH for on LOW for off
+  // digitalWrite(RED1, HIGH);
+  // digitalWrite(RED2, HIGH);
+  // digitalWrite(RED3, HIGH);
+}
+
+// triggers red led lights to display the outs
+void displayOuts(int outs) {
+  for (int i = 0; i < 3; i ++) {
+    if (i < outs) {
+      Serial.println(redPins[i]);
+      digitalWrite(redPins[i], HIGH);
+    } else {
+      digitalWrite(redPins[i], LOW);
+    }
+  }
 }
 
 void updateScreen() {
@@ -84,13 +137,15 @@ void loop() {
     int strikes = game_data["count"][0];
     int balls = game_data["count"][1];
     int inning = game_data["inning"];
-    int inningHalf = game_data["inning-half"];
+    String inningHalf = game_data["inning-half"];
     String lastPlay = game_data["last-play"];
+    int outs = game_data["outs"];
 
     String teams = awayTeam + String(" v ") + homeTeam;
     String score = awayScore + String("-") + homeScore;
     String count = strikes + String("-") + balls;
-    char* symbol = (strcmp(inningHalf, "top") == 0) ? "^" : "v";
+    char symbol = (inningHalf.equals("top")) ? 't' : 'b';
+
     String inningStatus = symbol + String(inning);
 
 
@@ -109,6 +164,12 @@ void loop() {
     } else {
       currentText[1] = String("S:") + score + String(" ") + String("C:") + count + String(" ") + inningStatus;
       updateScreen();
+    }
+
+
+    if (savedOuts != outs) {
+      displayOuts(outs);
+      savedOuts = outs;
     }
 
 
