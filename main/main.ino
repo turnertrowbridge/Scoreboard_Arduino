@@ -1,49 +1,3 @@
-#include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
-
-//www.elegoo.com
-//2016.12.9
-
-/*
-  LiquidCrystal Library - Hello World
-
- Demonstrates the use a 16x2 LCD display.  The LiquidCrystal
- library works with all LCD displays that are compatible with the
- Hitachi HD44780 driver. There are many of them out there, and you
- can usually tell them by the 16-pin interface.
-
- This sketch prints "Hello World!" to the LCD
- and shows the time.
-
-  The circuit:
- * LCD RS pin to digital pin 8
- * LCD Enable pin to digital pin 9
- * LCD D4 pin to digital pin 10
- * LCD D5 pin to digital pin 11
- * LCD D6 pin to digital pin 12
- * LCD D7 pin to digital pin 13
- * LCD R/W pin to ground
- * LCD VSS pin to ground
- * LCD VCC pin to 5V
- * 10K resistor:
- * ends to +5V and ground
- * wiper to LCD VO pin (pin 3)
-
- Library originally added 18 Apr 2008
- by David A. Mellis
- library modified 5 Jul 2009
- by Limor Fried (http://www.ladyada.net)
- example added 9 Jul 2009
- by Tom Igoe
- modified 22 Nov 2010
- by Tom Igoe
-
- This example code is in the public domain.
-
- http://www.arduino.cc/en/Tutorial/LiquidCrystal
- */
-
-// include the library code:
 #include <LiquidCrystal.h>
 #include <Arduino_JSON.h>
 
@@ -95,24 +49,9 @@ void setup() {
   greenValue = 224;
   blueValue = 208;
 
-  // digitalWrite(RGB_RED, HIGH);
-  // digitalWrite(RGB_GREEN, HIGH);
-  // digitalWrite(RGB_BLUE, HIGH);
-
   pinMode(A_GREEN, OUTPUT);
   pinMode(A_YELLOW, OUTPUT);
   pinMode(A_BLUE, OUTPUT);
-
-  // digitalWrite(A_GREEN, HIGH);
-  // digitalWrite(A_YELLOW, HIGH);
-  // digitalWrite(A_BLUE, HIGH);
-
-
-
-  // HIGH for on LOW for off
-  // digitalWrite(RED1, HIGH);
-  // digitalWrite(RED2, HIGH);
-  // digitalWrite(RED3, HIGH);
 }
 
 // triggers red led lights to display the outs
@@ -235,10 +174,9 @@ void loop() {
 
     if (JSON.typeof(game_data) == "undefined") {
       Serial.println("Failed to parse JSON");
-      Serial.println(jsonStr); // Print the JSON string received
+      // Serial.println(jsonStr); // Print the JSON string received
   
     } else {
-            Serial.println(jsonStr); // Print the JSON string received
 
         // Access JSON data
         String awayTeam = game_data["aT"];
@@ -265,19 +203,6 @@ void loop() {
         char symbol = (inningHalf.equals("top")) ? 't' : 'b';
 
         String inningStatus = symbol + String(inning);
-
-
-
-        Serial.println(strikes);
-        Serial.println(balls);
-        // Serial.println(score);
-        // Serial.println(count);
-        // Serial.println(inning);
-
-        Serial.println("Last Plays:");
-        Serial.println(savedLastPlay);
-        Serial.println(lastPlay);
-        Serial.println();
 
         currentText[0] = teamAbrvDisplay;
 
