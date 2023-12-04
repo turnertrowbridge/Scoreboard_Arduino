@@ -1,3 +1,6 @@
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
+
 //www.elegoo.com
 //2016.12.9
 
@@ -47,19 +50,25 @@
 #define RED1 7
 #define RED2 6
 #define RED3 5
-const int redPins[] = {7, 6, 5};
+const int redPins[] = {RED3, RED2, RED1};
 
 #define RGB_BLUE 4
 #define RGB_GREEN 3
 #define RGB_RED 2
+const int rgbPins[] = {RGB_BLUE, RGB_GREEN, RGB_RED};
 
-const int rgbPins[] = {4, 3, 2};
+#define A_GREEN A2
+#define A_YELLOW A3
+#define A_BLUE A4
+const int basePins[] = {A_GREEN, A_YELLOW, A_BLUE};
+
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
 String currentText[2]; // Array to store text for each row
 String savedLastPlay = "";
 int savedOuts = 0;
+String savedBases = "000";
 
 // rgb values
 int redValue;
@@ -86,9 +95,18 @@ void setup() {
   greenValue = 224;
   blueValue = 208;
 
-  digitalWrite(RGB_RED, HIGH);
-  digitalWrite(RGB_GREEN, HIGH);
-  digitalWrite(RGB_BLUE, HIGH);
+  // digitalWrite(RGB_RED, HIGH);
+  // digitalWrite(RGB_GREEN, HIGH);
+  // digitalWrite(RGB_BLUE, HIGH);
+
+  pinMode(A_GREEN, OUTPUT);
+  pinMode(A_YELLOW, OUTPUT);
+  pinMode(A_BLUE, OUTPUT);
+
+  // digitalWrite(A_GREEN, HIGH);
+  // digitalWrite(A_YELLOW, HIGH);
+  // digitalWrite(A_BLUE, HIGH);
+
 
 
   // HIGH for on LOW for off
@@ -109,6 +127,97 @@ void displayOuts(int outs) {
   }
 }
 
+void displayBases(String bases) {
+  Serial.println("Displaying bases");
+  for (int i = 0; i < 3; i++) {
+    Serial.print(i);
+    Serial.println(bases.charAt(i));
+      if (bases.charAt(i) != '0') {
+        digitalWrite(basePins[i], HIGH);
+    } else {
+      digitalWrite(basePins[i], LOW);
+    }
+  }
+}
+
+void homeRun() {
+  int j = 2;
+  while (j > 0) {
+    // Red
+    analogWrite(RGB_RED, 255);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+    // 1st base
+    digitalWrite(A_GREEN, HIGH);
+    digitalWrite(A_YELLOW, LOW);
+    digitalWrite(A_BLUE, LOW);
+
+    // RBG Off
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+
+    // Green
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 255);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+    // 2nd base
+    digitalWrite(A_GREEN, LOW);
+    digitalWrite(A_YELLOW, HIGH);
+    digitalWrite(A_BLUE, LOW);
+
+    // RGB OFF
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+    
+    // Blue
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 255);
+    delay(100);
+
+    // 3rd base
+    digitalWrite(A_GREEN, LOW);
+    digitalWrite(A_YELLOW, LOW);
+    digitalWrite(A_BLUE, HIGH);
+
+    // RBG Off
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+
+    // White
+    analogWrite(RGB_RED, 255);
+    analogWrite(RGB_GREEN, 255);
+    analogWrite(RGB_BLUE, 255);
+    delay(100);
+
+    // RBG off
+    analogWrite(RGB_RED, 0);
+    analogWrite(RGB_GREEN, 0);
+    analogWrite(RGB_BLUE, 0);
+    delay(100);
+
+    // Bases off
+    digitalWrite(A_GREEN, LOW);
+    digitalWrite(A_YELLOW, LOW);
+    digitalWrite(A_BLUE, LOW);
+
+    j--;
+}
+}
+
 void updateScreen() {
   lcd.clear(); // Clear the display
   lcd.setCursor(0, 0); // Set cursor to start of first row
@@ -126,63 +235,111 @@ void loop() {
 
     if (JSON.typeof(game_data) == "undefined") {
       Serial.println("Failed to parse JSON");
-      return;
-    }
-
-    // Access JSON data
-    String awayTeam = game_data["away-team"];
-    String homeTeam = game_data["home-team"];
-    int awayScore = game_data["away-score"];
-    int homeScore = game_data["home-score"];
-    int strikes = game_data["count"][0];
-    int balls = game_data["count"][1];
-    int inning = game_data["inning"];
-    String inningHalf = game_data["inning-half"];
-    String lastPlay = game_data["last-play"];
-    int outs = game_data["outs"];
-
-    String teams = awayTeam + String(" v ") + homeTeam;
-    String score = awayScore + String("-") + homeScore;
-    String count = strikes + String("-") + balls;
-    char symbol = (inningHalf.equals("top")) ? 't' : 'b';
-
-    String inningStatus = symbol + String(inning);
-
-
-    // Serial.println(teams);
-    // Serial.println(score);
-    // Serial.println(count);
-    // Serial.println(inning);
-
-    currentText[0] = teams;
-
-    if (savedLastPlay != lastPlay) {
-      currentText[1] = lastPlay;
-      updateScreen();
-      savedLastPlay = lastPlay;
-      delay(2000); // delay 2 seconds
+      Serial.println(jsonStr); // Print the JSON string received
+  
     } else {
-      currentText[1] = String("S:") + score + String(" ") + String("C:") + count + String(" ") + inningStatus;
-      updateScreen();
+            Serial.println(jsonStr); // Print the JSON string received
+
+        // Access JSON data
+        String awayTeam = game_data["aT"];
+        String awayAbrv = game_data["aA"];
+        String homeTeam = game_data["hT"];
+        String homeAbrv = game_data["hA"];
+        int awayScore = game_data["aS"];
+        int homeScore = game_data["hS"];
+        int strikes = game_data["cnt"][0];
+        int balls = game_data["cnt"][1];
+        int inning = game_data["in"];
+        String inningHalf = game_data["iH"];
+        String lastPlay = game_data["lP"];
+        int outs = game_data["outs"];
+        String bases = game_data["bases"];
+
+        Serial.print("Strikes: ");
+        Serial.println(bases);
+
+        String teamsFullDisplay = awayTeam + String(" v ") + homeTeam;
+        String teamAbrvDisplay = awayAbrv + String(" v ") + homeAbrv;
+        String score = awayScore + String("-") + homeScore;
+        String count = strikes + String("-") + balls;
+        char symbol = (inningHalf.equals("top")) ? 't' : 'b';
+
+        String inningStatus = symbol + String(inning);
+
+
+
+        Serial.println(strikes);
+        Serial.println(balls);
+        // Serial.println(score);
+        // Serial.println(count);
+        // Serial.println(inning);
+
+        Serial.println("Last Plays:");
+        Serial.println(savedLastPlay);
+        Serial.println(lastPlay);
+        Serial.println();
+
+        currentText[0] = teamAbrvDisplay;
+
+
+        if (awayTeam == "TBD"){
+          currentText[0] = String("No Games");
+          currentText[1] = String("Right Now");
+          updateScreen();
+
+          // Outs
+          digitalWrite(RED1, LOW);
+          digitalWrite(RED2, LOW);
+          digitalWrite(RED3, LOW);
+
+          // Bases
+          digitalWrite(A_GREEN, LOW);
+          digitalWrite(A_YELLOW, LOW);
+          digitalWrite(A_BLUE, LOW);
+
+          // RGB
+          analogWrite(RGB_RED, 0);
+          analogWrite(RGB_GREEN, 0);
+          analogWrite(RGB_BLUE, 0);
+
+          savedLastPlay = "";
+
+        } else{
+
+        if (savedLastPlay != lastPlay) {
+          currentText[0] = teamsFullDisplay;
+          currentText[1] = lastPlay;
+          updateScreen();
+          savedLastPlay = lastPlay;
+
+          if (lastPlay == "Home Run") {
+            homeRun();
+          }
+
+          if (lastPlay == "Game End") {
+            currentText[0] = String("Game End");
+            currentText[1] = awayAbrv + String(" - ") + awayScore + String("  ") + homeAbrv + String(" - ") + homeScore;
+            savedLastPlay = "ge";
+            updateScreen();
+          }
+        } else {
+          currentText[1] = String("S:") + score + String(" ") + String("C:") + count + String(" ") + inningStatus;
+          updateScreen();
+        }
+
+
+        if (savedOuts != outs) {
+          displayOuts(outs);
+          savedOuts = outs;
+        }
+
+        if (savedBases != bases) {
+          displayBases(bases);
+          savedBases = bases;
+        }   
+
+      delay(1000); // delay 3 seconds
     }
-
-
-    if (savedOuts != outs) {
-      displayOuts(outs);
-      savedOuts = outs;
-    }
-
-
-    // Determine the size of the array
-    // int arraySize = sizeof(currentText) / sizeof(currentText[0]);
-
-    // // Iterate through each string in the array and print its contents
-    // for (int i = 0; i < arraySize; i++) {
-    //   Serial.println(currentText[i]);
-    // }
-    
-
-  // Add other functionalities or actions here
   }
 }
 
