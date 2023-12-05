@@ -220,9 +220,8 @@ void loop() {
             String teamAbrvDisplay = awayAbrv + String(" v ") + homeAbrv;
             String score = awayScore + String("-") + homeScore;
             String count = strikes + String("-") + balls;
-            char symbol = (inningHalf.equals("top")) ? 't' : 'b';
 
-            String inningStatus = symbol + String(inning);
+            String inningStatus = inningHalf + String(inning);
 
             currentText[0] = teamAbrvDisplay;
 
@@ -287,7 +286,7 @@ void loop() {
                     savedBases = bases;
                 }
 
-                if (inningHalf == "top" && savedLastPlay != "ge") {
+                if (inningHalf == "t" && savedLastPlay != "ge") {
                     setTeamColor(AWAY_R, AWAY_G, AWAY_B);
                 } else if (savedLastPlay != "ge") {
                     setTeamColor(HOME_R, HOME_G, HOME_B);
