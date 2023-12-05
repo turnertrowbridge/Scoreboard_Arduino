@@ -103,7 +103,7 @@ void homeRun(int runs) {
         analogWrite(RGB_RED, 255);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
         // 1st base
         digitalWrite(A_GREEN, HIGH);
@@ -114,14 +114,14 @@ void homeRun(int runs) {
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
 
         // Green
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 255);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
         // 2nd base
         digitalWrite(A_GREEN, LOW);
@@ -132,14 +132,14 @@ void homeRun(int runs) {
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
 
         // Blue
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 255);
-        delay(100);
+        delay(125);
 
         // 3rd base
         digitalWrite(A_GREEN, LOW);
@@ -150,20 +150,20 @@ void homeRun(int runs) {
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
 
         // White
         analogWrite(RGB_RED, 255);
         analogWrite(RGB_GREEN, 255);
         analogWrite(RGB_BLUE, 255);
-        delay(100);
+        delay(125);
 
         // RBG off
         analogWrite(RGB_RED, 0);
         analogWrite(RGB_GREEN, 0);
         analogWrite(RGB_BLUE, 0);
-        delay(100);
+        delay(125);
 
         // Bases off
         digitalWrite(A_GREEN, LOW);
@@ -178,6 +178,25 @@ void setTeamColor(int r, int g, int b) {
     analogWrite(RGB_RED, r);
     analogWrite(RGB_GREEN, g);
     analogWrite(RGB_BLUE, b);
+}
+
+bool strikeOut() {
+    int j = 2;
+    while (j > 0) {
+        digitalWrite(RED1, LOW);
+        digitalWrite(RED2, LOW);
+        digitalWrite(RED3, LOW);
+        delay(200);
+
+        digitalWrite(RED3, HIGH);
+        delay(200);
+        digitalWrite(RED2, HIGH);
+        delay(200);
+        digitalWrite(RED1, HIGH);
+        delay(200);
+        j--;
+    }
+    return true;
 }
 
 void updateScreen() {
@@ -216,6 +235,8 @@ void loop() {
             int outs = game_data["outs"];
             String bases = game_data["bases"];
 
+            bool strikeoutLightsPlaying = false;
+
             String teamsFullDisplay = awayTeam + String(" v ") + homeTeam;
             String teamAbrvDisplay = awayAbrv + String(" v ") + homeAbrv;
             String score = awayScore + String("-") + homeScore;
@@ -251,7 +272,9 @@ void loop() {
             } else {
 
                 if (savedLastPlay != lastPlay) {
-                    currentText[0] = teamsFullDisplay;
+                    if (lastPlay == "Game Start") {
+                        currentText[0] = teamsFullDisplay;
+                    }
                     currentText[1] = lastPlay;
                     updateScreen();
                     savedLastPlay = lastPlay;
@@ -259,6 +282,11 @@ void loop() {
                     if (lastPlay == "Home Run") {
                         int runners = getRunnersOnBase(savedBases);
                         homeRun(runners);
+                    }
+
+                    if (lastPlay == "Strikeout") {
+                        strikeOut();
+                        strikeoutLightsPlaying = true;
                     }
 
                     if (lastPlay == "Game End") {
@@ -276,7 +304,7 @@ void loop() {
                 }
 
 
-                if (savedOuts != outs) {
+                if (savedOuts != outs && !strikeoutLightsPlaying) {
                     displayOuts(outs);
                     savedOuts = outs;
                 }
