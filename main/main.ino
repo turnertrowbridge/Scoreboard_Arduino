@@ -67,7 +67,6 @@ void setup() {
 void displayOuts(int outs) {
     for (int i = 0; i < 3; i++) {
         if (i < outs) {
-            Serial.println(redPins[i]);
             digitalWrite(redPins[i], HIGH);
         } else {
             digitalWrite(redPins[i], LOW);
@@ -75,11 +74,21 @@ void displayOuts(int outs) {
     }
 }
 
-void displayBases(String bases) {
-    Serial.println("Displaying bases");
+int getRunnersOnBase(String savedBases) {
+    int runners = 1;
     for (int i = 0; i < 3; i++) {
-        Serial.print(i);
-        Serial.println(bases.charAt(i));
+        if (savedBases.charAt(i) != '0') {
+            runners++;
+        }
+    }
+    if (runners == 1) {
+        runners = 3;
+    }
+    return runners;
+}
+
+void displayBases(String bases) {
+    for (int i = 0; i < 3; i++) {
         if (bases.charAt(i) != '0') {
             digitalWrite(basePins[i], HIGH);
         } else {
@@ -88,9 +97,8 @@ void displayBases(String bases) {
     }
 }
 
-void homeRun() {
-    int j = 2;
-    while (j > 0) {
+void homeRun(int runs) {
+    while (runs > 0) {
         // Red
         analogWrite(RGB_RED, 255);
         analogWrite(RGB_GREEN, 0);
@@ -162,7 +170,7 @@ void homeRun() {
         digitalWrite(A_YELLOW, LOW);
         digitalWrite(A_BLUE, LOW);
 
-        j--;
+        runs--;
     }
 }
 
@@ -250,7 +258,8 @@ void loop() {
                     savedLastPlay = lastPlay;
 
                     if (lastPlay == "Home Run") {
-                        homeRun();
+                        int runners = getRunnersOnBase(savedBases);
+                        homeRun(runners);
                     }
 
                     if (lastPlay == "Game End") {
