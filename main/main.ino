@@ -180,7 +180,7 @@ void setTeamColor(int r, int g, int b) {
     analogWrite(RGB_BLUE, b);
 }
 
-bool strikeOut() {
+void strikeOut() {
     int j = 2;
     while (j > 0) {
         digitalWrite(RED1, LOW);
@@ -235,8 +235,6 @@ void loop() {
             int outs = game_data["outs"];
             String bases = game_data["bases"];
 
-            bool strikeoutLightsPlaying = false;
-
             String teamsFullDisplay = awayTeam + String(" v ") + homeTeam;
             String teamAbrvDisplay = awayAbrv + String(" v ") + homeAbrv;
             String score = awayScore + String("-") + homeScore;
@@ -286,7 +284,6 @@ void loop() {
 
                     if (lastPlay == "Strikeout") {
                         strikeOut();
-                        strikeoutLightsPlaying = true;
                     }
 
                     if (lastPlay == "Game End") {
@@ -304,7 +301,7 @@ void loop() {
                 }
 
 
-                if (savedOuts != outs && !strikeoutLightsPlaying) {
+                if (savedOuts != outs) {
                     displayOuts(outs);
                     savedOuts = outs;
                 }
